@@ -17,6 +17,8 @@ find_package(rclcpp REQUIRED)
 find_package(rmw_implementation_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
 
+set(BLACKLIST "sick_scan;gazebo_msgs;sick_safetyscanners2_interfaces")
+
 # find ROS 1 packages
 set(cmake_extras_files cmake/find_ros1_package.cmake cmake/find_ros1_interface_packages.cmake)
 include(cmake/find_ros1_package.cmake)
@@ -48,6 +50,10 @@ find_package(xmlrpcpp REQUIRED)
 # find ROS 1 packages with messages / services
 include(cmake/find_ros1_interface_packages.cmake)
 find_ros1_interface_packages(ros1_message_packages)
+foreach(BLACKLIST_ITEM ${BLACKLIST})
+  list(REMOVE_ITEM ros1_message_packages "${BLACKLIST_ITEM}")
+endforeach()
+message(${ros1_message_packages})
 
 set(prefixed_ros1_message_packages "")
 foreach(ros1_message_package ${ros1_message_packages})
@@ -94,15 +100,17 @@ list(APPEND generated_files "${generated_path}/get_mappings.cpp")
 
 # generate per interface compilation units to keep the memory usage low
 ament_index_get_resources(ros2_interface_packages "rosidl_interfaces")
+foreach(BLACKLIST_ITEM ${BLACKLIST})
+  list(REMOVE_ITEM ros2_interface_packages "${BLACKLIST_ITEM}")
+endforeach()
+message(${ros2_interface_packages})
+
 # actionlib_msgs is deprecated, but we will quiet the warning until the bridge has support for
 # ROS actions: https://github.com/ros2/design/issues/195
 set(actionlib_msgs_DEPRECATED_QUIET TRUE)
 foreach(package_name ${ros2_interface_packages})
   find_package(${package_name} QUIET REQUIRED)
   message(STATUS "Found ${package_name}: ${${package_name}_VERSION} (${${package_name}_DIR})")
-  if("${package_name}" STREQUAL "sick_scan")
-    continue()
-  endif()
   if(NOT "${package_name}" STREQUAL "builtin_interfaces")
     list(APPEND generated_files "${generated_path}/${package_name}_factories.cpp")
     list(APPEND generated_files "${generated_path}/${package_name}_factories.hpp")
@@ -132,7 +140,7 @@ set(target_dependencies
 add_custom_command(
   OUTPUT ${generated_files}
   COMMAND ${PYTHON_EXECUTABLE} bin/ros1_bridge_generate_factories
-    --output-path "${generated_path}" --template-dir resource
+    --output-path "${generated_path}" --template-dir resource --blacklist '${BLACKLIST}'
   DEPENDS ${target_dependencies}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Generating factories for interface types")

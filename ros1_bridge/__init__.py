@@ -65,16 +65,17 @@ for package_path in reversed([p for p in rpp if p]):
 import rosmsg  # noqa
 
 
-def generate_cpp(output_path, template_dir):
+def generate_cpp(output_path, template_dir, blacklist):
+    blacklist = blacklist.split(' ') if blacklist else []
     rospack = rospkg.RosPack()
-    data = generate_messages(rospack)
+    data = generate_messages(rospack, blacklist)
     message_string_pairs = {
         (
             '%s/%s' % (m.ros1_msg.package_name, m.ros1_msg.message_name),
             '%s/%s' % (m.ros2_msg.package_name, m.ros2_msg.message_name))
         for m in data['mappings']}
     data.update(
-        generate_services(rospack, message_string_pairs=message_string_pairs))
+        generate_services(rospack, message_string_pairs=message_string_pairs, blacklist=blacklist))
 
     template_file = os.path.join(template_dir, 'get_mappings.cpp.em')
     output_file = os.path.join(output_path, 'get_mappings.cpp')
@@ -159,9 +160,9 @@ def generate_cpp(output_path, template_dir):
                 expand_template(template_file, data_idl_cpp, output_file)
 
 
-def generate_messages(rospack=None):
-    ros1_msgs = get_ros1_messages(rospack=rospack)
-    ros2_package_names, ros2_msgs, mapping_rules = get_ros2_messages()
+def generate_messages(rospack=None, blacklist=None):
+    ros1_msgs = get_ros1_messages(rospack=rospack, blacklist=blacklist)
+    ros2_package_names, ros2_msgs, mapping_rules = get_ros2_messages(blacklist)
 
     package_pairs = determine_package_pairs(ros1_msgs, ros2_msgs, mapping_rules)
     message_pairs = determine_message_pairs(ros1_msgs, ros2_msgs, package_pairs, mapping_rules)
@@ -226,9 +227,9 @@ def generate_messages(rospack=None):
     }
 
 
-def generate_services(rospack=None, message_string_pairs=None):
-    ros1_srvs = get_ros1_services(rospack=rospack)
-    ros2_pkgs, ros2_srvs, mapping_rules = get_ros2_services()
+def generate_services(rospack=None, message_string_pairs=None, blacklist=None):
+    ros1_srvs = get_ros1_services(rospack=rospack, blacklist=blacklist)
+    ros2_pkgs, ros2_srvs, mapping_rules = get_ros2_services(blacklist)
     services = determine_common_services(
         ros1_srvs, ros2_srvs, mapping_rules,
         message_string_pairs=message_string_pairs)
@@ -239,18 +240,20 @@ def generate_services(rospack=None, message_string_pairs=None):
     }
 
 
-def get_ros1_messages(rospack=None):
+def get_ros1_messages(rospack=None, blacklist=None):
     if not rospack:
         rospack = rospkg.RosPack()
     msgs = []
     pkgs = sorted(x for x in rosmsg.iterate_packages(rospack, rosmsg.MODE_MSG))
     for package_name, path in pkgs:
+        if blacklist and package_name in blacklist:
+            continue
         for message_name in rosmsg._list_types(path, 'msg', rosmsg.MODE_MSG):
             msgs.append(Message(package_name, message_name, path))
     return msgs
 
 
-def get_ros2_messages():
+def get_ros2_messages(blacklist=None):
     pkgs = []
     msgs = []
     rules = []
@@ -258,6 +261,8 @@ def get_ros2_messages():
     resource_type = 'rosidl_interfaces'
     resources = ament_index_python.get_resources(resource_type)
     for package_name, prefix_path in resources.items():
+        if blacklist and package_name in blacklist:
+            continue
         pkgs.append(package_name)
         resource, _ = ament_index_python.get_resource(resource_type, package_name)
         interfaces = resource.splitlines()
@@ -293,24 +298,28 @@ def get_ros2_messages():
     return pkgs, msgs, rules
 
 
-def get_ros1_services(rospack=None):
+def get_ros1_services(rospack=None, blacklist=None):
     if not rospack:
         rospack = rospkg.RosPack()
     srvs = []
     pkgs = sorted(x for x in rosmsg.iterate_packages(rospack, rosmsg.MODE_SRV))
     for package_name, path in pkgs:
+        if blacklist and package_name in blacklist:
+            continue
         for message_name in rosmsg._list_types(path, 'srv', rosmsg.MODE_SRV):
             srvs.append(Message(package_name, message_name, path))
     return srvs
 
 
-def get_ros2_services():
+def get_ros2_services(blacklist=None):
     pkgs = []
     srvs = []
     rules = []
     resource_type = 'rosidl_interfaces'
     resources = ament_index_python.get_resources(resource_type)
     for package_name, prefix_path in resources.items():
+        if blacklist and package_name in blacklist:
+            continue
         pkgs.append(package_name)
         resource, _ = ament_index_python.get_resource(resource_type, package_name)
         interfaces = resource.splitlines()
