@@ -2,6 +2,11 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* feat: blacklist packages
+* Contributors: Rein Appeldoorn
+
 1.0.0 (2023-09-20)
 ------------------
 * fix(cmake): exclude sick_scan
