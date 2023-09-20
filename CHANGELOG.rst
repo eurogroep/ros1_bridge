@@ -2,6 +2,11 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix(cmake): exclude sick_scan
+* Contributors: Rein Appeldoorn
+
 0.9.7 (2023-05-27)
 ------------------
 * remove xmlrpcpp from package.xml (`#406 <https://github.com/ros2/ros1_bridge/issues/406>`_)
