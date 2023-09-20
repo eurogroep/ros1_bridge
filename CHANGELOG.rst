@@ -2,8 +2,8 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2023-09-20)
+------------------
 * feat: blacklist packages
 * Contributors: Rein Appeldoorn
 
