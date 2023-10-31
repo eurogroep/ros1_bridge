@@ -2,6 +2,11 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* handle std_msgs properly
+* Contributors: Rein Appeldoorn
+
 1.1.0 (2023-09-20)
 ------------------
 * feat: blacklist packages
