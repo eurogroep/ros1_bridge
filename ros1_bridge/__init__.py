@@ -233,6 +233,16 @@ def generate_services(rospack=None, message_string_pairs=None, blacklist=None):
     services = determine_common_services(
         ros1_srvs, ros2_srvs, mapping_rules,
         message_string_pairs=message_string_pairs)
+
+    for service in services:
+        for item in service["fields"]["request"] + service["fields"]["response"]:
+            if item["ros1"]["type"] == "builtin_interfaces/Time":
+                item["ros1"]["type"] = "std_msgs/Time"
+                item["ros1"]["cpptype"] = "std_msgs::Time"
+            if item["ros1"]["type"] == "builtin_interfaces/Duration":
+                item["ros1"]["type"] = "std_msgs/Duration"
+                item["ros1"]["cpptype"] = "std_msgs::Duration"
+
     return {
         'services': services,
         'ros2_package_names_srv': ros2_pkgs,
