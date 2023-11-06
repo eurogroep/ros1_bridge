@@ -2,6 +2,11 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* feat: Support ROS1 latched topics
+* Contributors: Yannick de Hoop
+
 1.1.1 (2023-10-31)
 ------------------
 * handle std_msgs properly
