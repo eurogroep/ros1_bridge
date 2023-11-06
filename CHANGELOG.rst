@@ -2,8 +2,8 @@
 Changelog for package ros1_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2023-11-06)
+------------------
 * feat: Support ROS1 latched topics
 * Contributors: Yannick de Hoop
 
